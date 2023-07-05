@@ -11,6 +11,7 @@ const AuthContext = createContext({
     getAccessToken: () => { },
     saveUser: (userData: AuthResponse) => { },
     getRefreshToken:()=>{},
+    getUser: ()=>({} as User | undefined),
 });
 
 export function AuthProvider({ children }: AuthProviderProps) {
@@ -21,15 +22,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     //const [refreshToken, setRefreshToken] = useState<string>("");
 
-    useEffect(()=>{},[]);
+    useEffect(()=>{
+        checkAuth();
+    },[]);
 
     async function requestNewAccessToken(refreshToken: string){
         try {
             const response = await fetch(`${API_URL}/refresh-token`,{
                 method: "POST",
                 headers:{
-                    "content-type": "application/json",
-                    "Authorization": `Bearer ${refreshToken}`
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${refreshToken}`
                 }  
             });
             if(response.ok){
@@ -63,7 +66,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 if(json.error){
                     throw new Error(json.error);
                 }
-                return json;
+                return json.body;
             }else{
                 throw new Error(response.statusText);
             }
@@ -90,7 +93,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }
     
-    function saveSessionInfo(userInfo: User, AccessToken: string, refreshToken: string){
+    function saveSessionInfo(userInfo: User, accessToken: string, refreshToken: string){
         setAccessToken(accessToken);
         localStorage.setItem("token", JSON.stringify(refreshToken));
         setEsAutentico(true);
@@ -102,10 +105,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     function getRefreshToken():string | null {
-        const token = localStorage.getItem("token");
-        if(token){
-            const { refreshToken} = JSON.parse(token);
-            return refreshToken;
+        const tokenData = localStorage.getItem("token");
+        if(tokenData){
+            const token = JSON.parse(tokenData);
+            return token;
         }
         return null;
     };
@@ -117,8 +120,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
             userData.body.refreshToken )
     };
 
+    function getUser(){
+        return user
+    }
+
     return (
-        <AuthContext.Provider value={{ esAutentico, getAccessToken, saveUser, getRefreshToken }}>
+        <AuthContext.Provider value={{ esAutentico, getAccessToken, saveUser, getRefreshToken, getUser }}>
             {children}
         </AuthContext.Provider>
     );
