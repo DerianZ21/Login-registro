@@ -9,7 +9,6 @@ function getTokenFromHeader(headers){
  }else{
     return null;
  }
-
 }
 
 module.exports = getTokenFromHeader

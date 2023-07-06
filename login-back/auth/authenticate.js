@@ -8,8 +8,8 @@ function authenticate(req, res , next){
     if(token){
         const decoded = verifyAccessToken(token);
         if(decoded){
-            req.user = {...decoded.user};
-            next();
+            req.user = { ... decoded.user};
+            next(); 
         }else{
             res.status(401).json(jsonResponse(401, {
                 message: "no hay token"

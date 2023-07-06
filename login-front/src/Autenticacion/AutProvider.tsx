@@ -1,5 +1,5 @@
 import React, { useContext, createContext, useState, useEffect } from "react";
-import type { AccessTokenResponse, AuthResponse, User,  } from "../types/types";
+import type { AccessTokenResponse, AuthResponse, User  } from "../types/types";
 import { API_URL } from "../Autenticacion/constanst";
 
 interface AuthProviderProps {
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 method: "POST",
                 headers:{
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${refreshToken}`
+                    authorization: `Bearer ${refreshToken}`
                 }  
             });
             if(response.ok){
@@ -56,8 +56,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             const response = await fetch(`${API_URL}/user`,{
                 method: "GET",
                 headers:{
-                    "content-type": "application/json",
-                    "Authorization": `Bearer ${accessToken}`
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`
                 }  
             });
             if(response.ok){
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 if(newAccessToken){
                     const userInfo  = await getUserInfo(newAccessToken);
                     if(userInfo){
-                        saveSessionInfo(userInfo, newAccessToken,token);
+                        saveSessionInfo(userInfo.user, newAccessToken,token);
                     }
                 }
             }
@@ -117,11 +117,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         saveSessionInfo(
             userData.body.user, 
             userData.body.accessToken, 
-            userData.body.refreshToken )
+            userData.body.refreshToken );
     };
 
     function getUser(){
-        return user
+        return user;
     }
 
     return (
