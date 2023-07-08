@@ -1,22 +1,55 @@
 import { useAuth } from "../Autenticacion/AutProvider"
 import { useState, useEffect } from "react";
 import { API_URL } from "../Autenticacion/constanst";
+import PortalLayout from "../layout/PortalLayout";
 
 interface Todo {
-  id: string,
+  _id: string,
   title: string,
   completed: boolean;
+  idUser: string;
 }
 
 export default function Dashboard(){
 
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [title, seTitle]= useState("");
 
   const auth = useAuth();
 
   useEffect(()=>{
     loadTodos();
   }, []);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>){
+    e.preventDefault();
+    
+    createTodo();
+  }
+
+  async function createTodo() {
+    try {
+      const response = await fetch(`${API_URL}/todos`,{
+        method:"POST",
+        headers:{
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.getAccessToken()}`
+        },
+        body: JSON.stringify({
+          title,
+        }),
+      });
+
+      if(response.ok){
+        const json = await response.json();
+        setTodos([json,... todos]);
+      }else{
+
+      }
+    } catch (error) {
+      
+    }
+  }
 
   async function loadTodos() {
     try {
@@ -43,9 +76,12 @@ export default function Dashboard(){
 
 
   return (
-    <div>
+    <PortalLayout>
       <h1>Dashboard de {auth.getUser()?.name || ""}</h1>
-      {todos.map((todo)=>(<div>{todo.title}</div>))}
-    </div>
+      <form onSubmit={handleSubmit}>
+        <input type="text" placeholder="nuevo to-do..." onChange={(e)=>seTitle(e.target.value)} value={title}></input>
+      </form>
+      {todos.map((todo)=>(<div key={todo._id}>{todo.title}</div>))}
+    </PortalLayout>
   )
 }
